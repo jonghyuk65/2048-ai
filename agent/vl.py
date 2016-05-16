@@ -2,6 +2,7 @@ import numpy as np
 import random
 import time
 from environment.Simple2048 import Simple2048
+import cPickle as pickle
 
 class ntuple(object):
     # value network learning with n(4)-tuple
@@ -11,6 +12,14 @@ class ntuple(object):
         self.timecut = timecut
         self.env = Simple2048()
         self.v = [0 for i in range(18*18*18*18)] # init by 0
+
+    def save(self, filename = 'vl.pkl'):
+        with open(filename, 'w') as f:
+            pickle.dump(self.v, f)
+
+    def load(self, filename = 'vl.pkl'):
+        with open(filename, 'r') as f:
+            self.v = pickle.load(f)
 
     def row2idx(self, row):
         return row[0] * 18 * 18 * 18 + row[1] * 18 * 18 + row[2] * 18 + row[3]
