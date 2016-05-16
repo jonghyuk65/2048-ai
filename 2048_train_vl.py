@@ -10,12 +10,14 @@ def train(agent):
     # playouts by policy in agent
     start = time.time()
     alpha = 0.0025
-    for epoch in range(1000000):
+    save_period = 100000
+    num_epoch = 1000000
+    for epoch in range(num_epoch):
         score, maxval = agent.train_playout(lr = alpha)
         print("%010.6f Epoch %d: Score %d, Max %d" % (time.time() - start, epoch, score, maxval))
-        if epoch % 50000 == 49999:
-            with open('vl_{}_{}'.format(train_time, epochs)) as f:
-                f.save(agent)
+        if epoch % save_period == save_period-1:
+            with open('vl_{}_{}'.format(train_time, epoch), 'w') as f:
+                pickle.dump(agent, f)
 
 def main(argv):
     agent = ntuple(verbose = False)

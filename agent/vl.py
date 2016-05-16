@@ -94,6 +94,7 @@ class ntuple(object):
         return rsum, self.env.maxVal()
 
     def get_move(self, board):
+        board = [board[i][j] for i in range(4) for j in range(4)]
         # 1ply
         m = self.max_eval(board, verbose = self.verbose)
         return m

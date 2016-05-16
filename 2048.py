@@ -98,7 +98,7 @@ def main(argv):
         agent = SimpleMC(verbose=True)
     elif args.agent == 'vl':
         from agent.vl import ntuple
-        with open(args.argdir) as f:
+        with open(args.argdir, 'r') as f:
             agent = pickle.load(f)
     elif args.agent == 'dqn':
         # not implemented
