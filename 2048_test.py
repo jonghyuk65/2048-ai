@@ -3,6 +3,7 @@ from agent.SimpleAgent import MaxMerge
 from agent.MonteCarlo import SimpleMC
 from agent.environment.Simple2048 import Simple2048
 import time
+import numpy as np
 
 def test(agent):
     env = Simple2048(None)
@@ -24,15 +25,16 @@ def test(agent):
 
 def testAgent(N, agent):
     print "Test ", agent.__class__.__name__
-    scores = 0
-    maxval = 0
+    res = np.zeros([N, 4])
     for i in range(N):
         start = time.time()
         score, v, movecount = test(agent)
-        print i+1, ":", score, v, movecount, time.time()-start
-        scores = scores + score
-        if maxval < v: maxval = v
-    print "Results:", scores / float(N), maxval
+        res[i,0] = time.time()-start
+        res[i,1] = movecount
+        res[i,2] = score
+        res[i,3] = v
+        print i+1, ":", res[i]
+    print "Results:", sum(res[:,2]) / float(N), max(res[:,3])
     print ""
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ def train(agent):
                 f.save(agent)
 
 def main(argv):
-    agent = ntuple(verbose = True)
+    agent = ntuple(verbose = False)
     train(agent)
 
 if __name__ == '__main__':

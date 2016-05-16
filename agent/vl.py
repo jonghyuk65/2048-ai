@@ -42,10 +42,10 @@ class ntuple(object):
             self.v[idx] = self.v[idx] + delta_v
 
     def eval_move(self, board, m):
-        r, s, _, _ = self.env.do_move_emulate(board, m)
+        r, s_after = self.env.do_move_emulate(board, m)
         if r == -1:
             return -1
-        return r + self.eval_board(s)
+        return r + self.eval_board(s_after)
 
     def movename(self, move):
         return ['left', 'down', 'right', 'up'][move]
@@ -55,42 +55,42 @@ class ntuple(object):
         for m in range(4):
             r = self.eval_move(board, m)
             vs.append(r)
-        if verbose:
-            print [(self.movename(i), vs[i]) for i in range(4)]
+        if verbose: print [(self.movename(i), vs[i]) for i in range(4)]
         maxv = max(vs)
-        if maxv == -1:
-            return -1
+        if maxv == -1: return -1
         moves = []
         for i in range(4):
             if vs[i] == maxv:
                 moves.append(i)
         m = random.choice(moves)
-        if verbose:
-            print "Move : ", self.movename(m)
+        if verbose: print "Move : ", self.movename(m)
         return m
 
-    def learn_move(self, board, m, lr):
-        r, s, s_after, s_next = self.env.do_move_emulate(board, m)
+    def learn_move(self, s, a, s_next, lr):
+        r, s_after = self.env.do_move_emulate(s, a)
         a_next = self.max_eval(s_next)
-        if a_next == -1:
+        if a_next == -1: # terminal
+            self.upd_eval(s_after, lr * (0 - self.eval_board(s_after)))
             return
-        r_next, _, s_next_after, _ = self.env.do_move_emulate(s_next, a_next)
+        r_next, s_next_after = self.env.do_move_emulate(s_next, a_next)
         self.upd_eval(s_after, lr * (r_next + self.eval_board(s_next_after) - self.eval_board(s_after)))
 
     def train_playout(self, lr = 0.001):
         self.env.init_board()
         rsum = 0
         while True:
+            # do move
             moves = self.env.legal_moves()
-            if len(moves) == 0:
-                break
-            board = self.env.getBoard()
-            if self.verbose:
-                self.env.printState()
-            m = self.max_eval(board, verbose = self.verbose)
-            self.learn_move(board, m, lr)
+            if len(moves) == 0: break
+            s = self.env.getBoard_copy()
+            if self.verbose: self.env.printState()
+            m = self.max_eval(s, verbose = self.verbose)
             r = self.env.do_move(m)
             rsum = rsum + r
+
+            # update
+            s_next = self.env.getBoard_copy()
+            self.learn_move(s, m, s_next, lr)
         return rsum, self.env.maxVal()
 
     def get_move(self, board):
