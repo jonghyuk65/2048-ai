@@ -86,6 +86,25 @@ class Simple2048(object):
         p = random.choice(empty_cells)
         self.board[p] = 2 if random.randrange(10) == 0 else 1
 
+    def do_move_emulate(self, board, d):
+        r = 0
+        after_state = [board[i] for i in range(16)]
+        is_moved = False
+        for row in self.directions[d]:
+            next_row_idx, reward, is_row_moved = self.moveleft[self.row2idx([after_state[row[i]] for i in range(4)])]
+            is_moved = is_moved or is_row_moved
+            next_row = self.idx2row(next_row_idx)
+            for i in range(4): after_state[row[i]] = next_row[i]
+            r = r + reward
+        if not is_moved:
+            return -1, None, None, None
+        next_state = [after_state[i] for i in range(16)]
+        empty_cells = [i for i in range(16) if next_state[i] == 0]
+        if len(empty_cells) == 0: return
+        p = random.choice(empty_cells)
+        next_state[p] = 2 if random.randrange(10) == 0 else 1
+        return r, board, after_state, next_state
+
     def printState(self):
         c = [2**self.board[i] if self.board[i] > 0 else 0 for i in range(16)]
         print np.reshape(c, [4,4])

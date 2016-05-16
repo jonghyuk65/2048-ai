@@ -6,6 +6,7 @@
 from __future__ import print_function
 import time
 import os
+import cPickle as pickle
 
 def print_board(m):
     for row in m:
@@ -54,8 +55,9 @@ def parse_args(argv):
     import argparse
 
     parser = argparse.ArgumentParser(description="Use the AI to play 2048 via browser control")
-    parser.add_argument('-a', '--agent', help="Select which agent to play (default: random, others: maxmerge, mc(Monte Carlo Simulation), dqn)", default = 'random', choices=('random', 'maxmerge', 'mc', 'dqn'))
+    parser.add_argument('-a', '--agent', help="Select which agent to play (default: random, others: maxmerge, mc(Monte Carlo Simulation), vl(value function learning with 4-tuple network), dqn)", default = 'random', choices=('random', 'maxmerge', 'mc', 'vl', 'dqn'))
     parser.add_argument('-p', '--port', help="Port number to control on (default: 32000 for Firefox, 9222 for Chrome)", type=int)
+    parser.add_argument('-g', '--argdir', help="Argument directory, need to be given in vl, dqn")
     parser.add_argument('-b', '--browser', help="Browser you're using. Only Firefox with the Remote Control extension, and Chrome with remote debugging, are supported right now.", default='firefox', choices=('firefox', 'chrome'))
     parser.add_argument('-k', '--ctrlmode', help="Control mode to use. If the browser control doesn't seem to work, try changing this.", default='hybrid', choices=('keyboard', 'fast', 'hybrid'))
 
@@ -94,6 +96,10 @@ def main(argv):
     elif args.agent == 'mc':
         from agent.MonteCarlo import SimpleMC
         agent = SimpleMC(verbose=True)
+    elif args.agent == 'vl':
+        from agent.vl import ntuple
+        with open(args.argdir) as f:
+            agent = pickle.load(f)
     elif args.agent == 'dqn':
         # not implemented
         pass

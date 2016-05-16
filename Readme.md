@@ -17,3 +17,11 @@ So just n-ply model of DQN(deep q learning or maybe value learning) is my plan
 Currently implemented: random, maximum merge(greedy), monte carlo simulation
 
 TODO: DQN
+
+## DQN ideas
+
+# Symmetry of Q function
+
+for example of board B and B' which is upside-down transposition of B
+
+Q(B, up) = Q(B', down) must hold

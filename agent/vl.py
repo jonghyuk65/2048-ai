@@ -1,0 +1,95 @@
+import numpy as np
+import random
+import time
+from environment.Simple2048 import Simple2048
+
+class ntuple(object):
+    # value network learning with n(4)-tuple
+
+    def __init__(self, verbose = False, timecut = 0.1):
+        self.verbose = verbose
+        self.timecut = timecut
+        self.env = Simple2048()
+        self.v = [0 for i in range(18*18*18*18)] # init by 0
+
+    def row2idx(self, row):
+        return row[0] * 18 * 18 * 18 + row[1] * 18 * 18 + row[2] * 18 + row[3]
+
+    def board2idxs(self, board):
+        tuples = [[0,1,2,3],
+                  [4,5,6,7],
+                  [8,9,10,11],
+                  [12,13,14,15],
+                  [0,4,8,12],
+                  [1,5,9,13],
+                  [2,6,10,14],
+                  [3,7,11,15]]
+        idxs = []
+        for tp in tuples:
+            idxs.append(self.row2idx([board[tp[i]] for i in range(4)]))
+        return idxs
+
+    def eval_board(self, board):
+        idxs = self.board2idxs(board)
+        vsum = 0
+        for idx in idxs:
+            vsum = vsum + self.v[idx]
+        return vsum
+
+    def upd_eval(self, board, delta_v):
+        idxs = self.board2idxs(board)
+        for idx in idxs:
+            self.v[idx] = self.v[idx] + delta_v
+
+    def eval_move(self, board, m):
+        r, s, _, _ = self.env.do_move_emulate(board, m)
+        if r == -1:
+            return -1
+        return r + self.eval_board(s)
+
+    def max_eval(self, board):
+        vs = []
+        for m in range(4):
+            r = self.eval_move(board, m)
+            vs.append(r)
+        maxv = max(vs)
+        if maxv == -1:
+            return -1
+        for i in range(4):
+            if vs[i] == maxv:
+                return i
+        return 0
+
+    def learn_move(self, board, m, lr):
+        r, s, s_after, s_next = self.env.do_move_emulate(board, m)
+        a_next = self.max_eval(s_next)
+        if a_next == -1:
+            return
+        r_next, _, s_next_after, _ = self.env.do_move_emulate(s_next, a_next)
+        self.upd_eval(s_after, lr * (r_next + self.eval_board(s_next_after) - self.eval_board(s_after)))
+
+    def train_playout(self, lr = 0.001):
+        self.env.init_board()
+        rsum = 0
+        while True:
+            moves = self.env.legal_moves()
+            if len(moves) == 0:
+                break
+            board = self.env.getBoard()
+            vs = [self.eval_move(board, m) for m in moves]
+            maxv = max(vs)
+            maxidx = [i for i in range(len(moves)) if vs[i] == maxv]
+            p = moves[random.choice(maxidx)]
+            if self.verbose:
+                self.env.printState()
+                print zip(moves, vs)
+                print "Move : ", p
+            self.learn_move(board, p, lr)
+            r = self.env.do_move(p)
+            rsum = rsum + r
+        return rsum, self.env.maxVal()
+
+    def get_move(self, board):
+        # 1ply
+        m = self.max_eval(board)
+        return m
