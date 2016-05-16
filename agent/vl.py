@@ -47,18 +47,27 @@ class ntuple(object):
             return -1
         return r + self.eval_board(s)
 
-    def max_eval(self, board):
+    def movename(self, move):
+        return ['left', 'down', 'right', 'up'][move]
+
+    def max_eval(self, board, verbose = False):
         vs = []
         for m in range(4):
             r = self.eval_move(board, m)
             vs.append(r)
+        if verbose:
+            print [(self.movename(i), vs[i]) for i in range(4)]
         maxv = max(vs)
         if maxv == -1:
             return -1
+        moves = []
         for i in range(4):
             if vs[i] == maxv:
-                return i
-        return 0
+                moves.append(i)
+        m = random.choice(moves)
+        if verbose:
+            print "Move : ", self.movename(m)
+        return m
 
     def learn_move(self, board, m, lr):
         r, s, s_after, s_next = self.env.do_move_emulate(board, m)
@@ -76,20 +85,15 @@ class ntuple(object):
             if len(moves) == 0:
                 break
             board = self.env.getBoard()
-            vs = [self.eval_move(board, m) for m in moves]
-            maxv = max(vs)
-            maxidx = [i for i in range(len(moves)) if vs[i] == maxv]
-            p = moves[random.choice(maxidx)]
             if self.verbose:
                 self.env.printState()
-                print zip(moves, vs)
-                print "Move : ", p
-            self.learn_move(board, p, lr)
-            r = self.env.do_move(p)
+            m = self.max_eval(board, verbose = self.verbose)
+            self.learn_move(board, m, lr)
+            r = self.env.do_move(m)
             rsum = rsum + r
         return rsum, self.env.maxVal()
 
     def get_move(self, board):
         # 1ply
-        m = self.max_eval(board)
+        m = self.max_eval(board, verbose = self.verbose)
         return m
