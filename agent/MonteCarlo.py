@@ -22,7 +22,7 @@ class SimpleMC(object):
             m = self.env.legal_moves()
             if len(m) == 0:
                 break
-            p = random.randrange(len(m))
+            p = random.choice(m)
             r = self.env.do_move(p)
             rsum = rsum + r
         return rsum
