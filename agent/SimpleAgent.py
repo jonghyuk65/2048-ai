@@ -1,13 +1,15 @@
 import random
+from agent.environment.Simple2048 import Simple2048
 
 class RandomAgent(object):
     # Play randomly
 
     def __init__(self):
-        pass
+        self.env = Simple2048()
 
     def get_move(self, board):
-        return random.randrange(4)
+        self.env.init_board(board)
+        return random.choice(self.env.legal_moves())
 
 class MaxMerge(object):
     # Find Max Merge

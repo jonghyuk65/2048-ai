@@ -95,11 +95,10 @@ def main(argv):
         agent = MaxMerge()
     elif args.agent == 'mc':
         from agent.MonteCarlo import SimpleMC
-        agent = SimpleMC(verbose=True)
+        agent = SimpleMC(verbose = True)
     elif args.agent == 'vl':
         from agent.vl import ntuple
-        agent = ntuple(verbose = False)
-        agent.load(args.argdir)
+        agent = ntuple(verbose = True, filename = args.argdir)
     elif args.agent == 'dqn':
         # not implemented
         pass

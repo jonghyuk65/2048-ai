@@ -116,6 +116,15 @@ class Simple2048(object):
     def getBoard_copy(self):
         return [self.board[i] for i in range(16)]
 
+    def getBoard_plane(self):
+        board = []
+        for i in range(4):
+            row = []
+            for j in range(4):
+                row.append(self.board[i*4+j])
+            board.append(row)
+        return board
+
     def maxVal(self):
         return 2**max(self.board)
 

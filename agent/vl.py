@@ -7,12 +7,14 @@ import cPickle as pickle
 class ntuple(object):
     # value network learning with n(4)-tuple
 
-    def __init__(self, verbose = False, timecut = 0.1):
+    def __init__(self, verbose = False, timecut = 0.1, filename = None):
         self.verbose = verbose
         self.timecut = timecut
         self.env = Simple2048()
         self.v1 = [0 for i in range(18*18*18*18)] # row score, init by 0
         self.v2 = [0 for i in range(18*18*18*18)] # box score, init by 0
+        if filename is not None:
+            self.load(filename)
         # 0 1 2 3
         # 4 5 6 7
         # 8 9 10 11
@@ -33,12 +35,12 @@ class ntuple(object):
             for j in range(3):
                 self.tuples2.append([4*i+j, 4*i+j+1, 4*(i+1)+j, 4*(i+1)+j+1])
 
-    def save(self, filename = 'vl.pkl'):
+    def save(self, filename):
         with open(filename, 'w') as f:
             pickle.dump(self.v1, f)
             pickle.dump(self.v2, f)
 
-    def load(self, filename = 'vl.pkl'):
+    def load(self, filename):
         with open(filename, 'r') as f:
             self.v1 = pickle.load(f)
             self.v2 = pickle.load(f)
