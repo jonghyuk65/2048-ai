@@ -72,7 +72,7 @@ class ntuple(object):
         if verbose: print [(self.movename(moves[i]), vals[i]) for i in range(4)]
         maxv = max(vals)
         max_moves = []
-        for i in range(4):
+        for i in range(len(moves)):
             if vals[i] == maxv:
                 max_moves.append(moves[i])
         m = random.choice(max_moves)
