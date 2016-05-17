@@ -52,38 +52,42 @@ class ntuple(object):
 
     def eval_move(self, board, m):
         r, s_after = self.env.do_move_emulate(board, m)
-        if r == -1:
-            return -1
+        if r is None:
+            return None
         return r + self.eval_board(s_after)
 
     def movename(self, move):
         return ['left', 'down', 'right', 'up'][move]
 
     def max_eval(self, board, verbose = False):
-        vs = []
+        vals = []
+        moves = []
         for m in range(4):
             r = self.eval_move(board, m)
-            vs.append(r)
-        if verbose: print [(self.movename(i), vs[i]) for i in range(4)]
-        maxv = max(vs)
-        if maxv == -1: return -1
-        moves = []
+            if r is not None:
+                vals.append(r)
+                moves.append(m)
+        if len(moves) == 0:
+            return None
+        if verbose: print [(self.movename(moves[i]), vals[i]) for i in range(4)]
+        maxv = max(vals)
+        max_moves = []
         for i in range(4):
-            if vs[i] == maxv:
-                moves.append(i)
-        m = random.choice(moves)
+            if vals[i] == maxv:
+                max_moves.append(moves[i])
+        m = random.choice(max_moves)
         if verbose: print "Move : ", self.movename(m)
         return m
 
     def learn_move(self, s, a, s_next, lr):
         r, s_after = self.env.do_move_emulate(s, a)
         a_next = self.max_eval(s_next)
-        if r == -1:
-            print "ERROR!!"
+        if r == None:
+            print "ERROR!!, ILLEGAL MOVE"
             print s
             print a
             print s_next
-        if a_next == -1: # terminal
+        if a_next == None: # terminal
             self.upd_eval(s_after, lr * (0 - self.eval_board(s_after)))
             return
         r_next, s_next_after = self.env.do_move_emulate(s_next, a_next)

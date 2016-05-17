@@ -72,11 +72,17 @@ class Simple2048(object):
 
     def do_move(self, d):
         r = 0
+        is_moved = False
         for row in self.directions[d]:
-            next_row_idx, reward, _ = self.moveleft[self.row2idx([self.board[row[i]] for i in range(4)])]
+            next_row_idx, reward, is_row_moved = self.moveleft[self.row2idx([self.board[row[i]] for i in range(4)])]
+            is_moved = is_moved or is_row_moved
             next_row = self.idx2row(next_row_idx)
             for i in range(4): self.board[row[i]] = next_row[i]
             r = r + reward
+        if not is_moved:
+            print "ILLEGAL MOVE!!"
+            self.printState()
+            print "tried ", d
         self.addRand()
         return r
 
@@ -97,7 +103,7 @@ class Simple2048(object):
             for i in range(4): after_state[row[i]] = next_row[i]
             r = r + reward
         if not is_moved:
-            return -1, None
+            return None, None
         return r, after_state
 
     def printState(self):
