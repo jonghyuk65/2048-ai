@@ -17,8 +17,19 @@ def train(agent):
         if epoch % save_period == 0 and epoch > 0:
             agent.save(filename = 'models/vl_{}_{}'.format(train_time, epoch))
 
+def parse_args(argv):
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Train")
+    parser.add_argument('-m', '--model', help="model to continue")
+
+    return parser.parse_args(argv)
+
 def main(argv):
+    args = parse_args(argv)
     agent = ntuple(verbose = False)
+    if args.model is not None:
+        agent.load(args.model)
     train(agent)
 
 if __name__ == '__main__':

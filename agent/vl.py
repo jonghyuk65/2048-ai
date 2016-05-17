@@ -78,6 +78,11 @@ class ntuple(object):
     def learn_move(self, s, a, s_next, lr):
         r, s_after = self.env.do_move_emulate(s, a)
         a_next = self.max_eval(s_next)
+        if r == -1:
+            print "ERROR!!"
+            print s
+            print a
+            print s_next
         if a_next == -1: # terminal
             self.upd_eval(s_after, lr * (0 - self.eval_board(s_after)))
             return
