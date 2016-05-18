@@ -105,7 +105,7 @@ class ntuple(object):
                 moves.append(m)
         if len(moves) == 0:
             return None
-        if verbose: print [(self.movename(moves[i]), vals[i]) for i in range(4)]
+        if verbose: print [(self.movename(moves[i]), vals[i]) for i in range(len(moves))]
         maxv = max(vals)
         max_moves = []
         for i in range(len(moves)):

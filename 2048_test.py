@@ -36,7 +36,7 @@ def testAgent(N, agent):
         res[i,3] = v
         print i+1, ":", res[i]
     print "Results:", sum(res[:,2]) / float(N), max(res[:,3])
-    for i in range(9,13):
+    for i in range(8,14):
         cnt = 0
         for j in range(N):
             if res[j,3] >= 2**i:
@@ -45,7 +45,7 @@ def testAgent(N, agent):
     print ""
 
 if __name__ == '__main__':
-    testAgent(10, RandomAgent())
-    testAgent(10, MaxMerge())
-    testAgent(10, SimpleMC())
+    testAgent(100, RandomAgent())
+    testAgent(100, MaxMerge())
+    testAgent(100, SimpleMC())
     #testAgent(10, ntuple(filename = 'models/?'))
