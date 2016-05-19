@@ -7,12 +7,13 @@ import cPickle as pickle
 class ntuple(object):
     # value network learning with n(4)-tuple
 
-    def __init__(self, verbose = False, timecut = 0.1, filename = None):
+    def __init__(self, verbose = False, timecut = 0.1, filename = None, depth = 1):
         self.verbose = verbose
         self.timecut = timecut
         self.env = Simple2048()
         self.v1 = [0 for i in range(18*18*18*18)] # row score, init by 0
         self.v2 = [0 for i in range(18*18*18*18)] # box score, init by 0
+        self.depth = depth
         if filename is not None:
             self.load(filename)
         # 0 1 2 3
@@ -95,7 +96,7 @@ class ntuple(object):
     def movename(self, move):
         return ['left', 'down', 'right', 'up'][move]
 
-    def max_eval(self, board, verbose = False):
+    def max_eval(self, board, verbose = False, needVal = False):
         vals = []
         moves = []
         for m in range(4):
@@ -103,6 +104,9 @@ class ntuple(object):
             if r is not None:
                 vals.append(r)
                 moves.append(m)
+        if needVal:
+            if len(vals) == 0: return 0
+            return max(vals)
         if len(moves) == 0:
             return None
         if verbose: print [(self.movename(moves[i]), vals[i]) for i in range(len(moves))]
@@ -147,8 +151,43 @@ class ntuple(object):
             self.learn_move(s, m, s_next, lr)
         return rsum, self.env.maxVal()
 
+    def max_eval_ts(self, board, depth, verbose, isRoot):
+        if depth == 1:
+            if isRoot:
+                return self.max_eval(board, verbose = verbose)
+            return self.max_eval(board, verbose = False, needVal = True)
+        moves = []
+        vals = []
+        for m in range(4):
+            r, s_after = self.env.do_move_emulate(board, m)
+            if r is None: continue
+            v = 0
+            cnt = 0
+            for i in range(16):
+                if s_after[i] == 0:
+                    s_after[i] = 1
+                    v = v + 0.9 * self.max_eval_ts(s_after, depth-1, False, False)
+                    s_after[i] = 2
+                    v = v + 0.1 * self.max_eval_ts(s_after, depth-1, False, False)
+                    cnt = cnt + 1
+                    s_after[i] = 0
+            v = r + v / cnt
+            moves.append(m)
+            vals.append(v)
+        if isRoot and verbose: print [(self.movename(moves[i]), vals[i]) for i in range(len(moves))]
+        maxv = max(vals)
+        if not isRoot:
+            if len(vals) == 0: return 0
+            return maxv
+        max_moves = []
+        for i in range(len(moves)):
+            if vals[i] == maxv:
+                max_moves.append(moves[i])
+        m = random.choice(max_moves)
+        if isRoot and verbose: print "Move : ", self.movename(m)
+        return m
+
     def get_move(self, board):
         board = [board[i][j] for i in range(4) for j in range(4)]
-        # 1ply
-        m = self.max_eval(board, verbose = self.verbose)
+        m = self.max_eval_ts(board, self.depth, self.verbose, True)
         return m

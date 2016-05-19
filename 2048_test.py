@@ -45,7 +45,8 @@ def testAgent(N, agent):
     print ""
 
 if __name__ == '__main__':
-    testAgent(100, RandomAgent())
-    testAgent(100, MaxMerge())
-    testAgent(100, SimpleMC())
-    #testAgent(10, ntuple(filename = 'models/?'))
+    #testAgent(100, RandomAgent())
+    #testAgent(100, MaxMerge())
+    #testAgent(100, SimpleMC())
+    #testAgent(100, ntuple(filename = 'models/vl_0518110412_50000'))
+    testAgent(100, ntuple(filename = 'models/vl_0518110412_50000', depth = 2))
