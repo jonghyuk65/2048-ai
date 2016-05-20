@@ -14,14 +14,4 @@ At first, MCTS was also considered but I suspended that plan because 2048 needs 
 
 So just n-ply model of DQN(deep q learning or maybe value learning) is my plan
 
-Currently implemented: random, maximum merge(greedy), monte carlo simulation
-
-TODO: DQN
-
-## DQN ideas
-
-# Symmetry of Q function
-
-for example of board B and B' which is upside-down transposition of B
-
-Q(B, up) = Q(B', down) must hold
+Currently implemented: random, maximum merge(greedy), monte carlo simulation, value learning (n-ply playing)
