@@ -1,7 +1,7 @@
 from __future__ import print_function
 import time
 import os
-from agent.vl import ntuple
+from agent.vl_light import ntuple_light
 
 train_time = time.strftime("%m%d%H%M%S")
 
@@ -15,7 +15,7 @@ def train(agent):
         score, maxval = agent.train_playout(lr = alpha)
         print("%010.6f Epoch %d: Score %d, Max %d" % (time.time() - start, epoch, score, maxval))
         if epoch % save_period == 0 and epoch > 0:
-            agent.save(filename = 'models/vl_{}_{}'.format(train_time, epoch))
+            agent.save(filename = 'models/vl_light_{}_{}'.format(train_time, epoch))
 
 def parse_args(argv):
     import argparse
@@ -27,7 +27,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    agent = ntuple(verbose = False)
+    agent = ntuple_light(verbose = False)
     if args.model is not None:
         agent.load(args.model)
     train(agent)

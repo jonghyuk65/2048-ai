@@ -55,9 +55,9 @@ def parse_args(argv):
     import argparse
 
     parser = argparse.ArgumentParser(description="Use the AI to play 2048 via browser control")
-    parser.add_argument('-a', '--agent', help="Select which agent to play (default: random, others: maxmerge, mc(Monte Carlo Simulation), vl(value function learning with 4-tuple network), dqn)", default = 'random', choices=('random', 'maxmerge', 'mc', 'vl', 'dqn'))
+    parser.add_argument('-a', '--agent', help="Select which agent to play (default: random, others: maxmerge, mc(Monte Carlo Simulation), vl(value function learning with 4-tuple network), vll(vl with less weights), dqn)", default = 'random', choices=('random', 'maxmerge', 'mc', 'vl', 'vll', 'dqn'))
     parser.add_argument('-p', '--port', help="Port number to control on (default: 32000 for Firefox, 9222 for Chrome)", type=int)
-    parser.add_argument('-g', '--argdir', help="Argument directory, need to be given in vl, dqn")
+    parser.add_argument('-g', '--argdir', help="Argument directory, need to be given in vl, vll, dqn")
     parser.add_argument('-d', '--depth', help="argument for n-ply search", type=int)
     parser.add_argument('-b', '--browser', help="Browser you're using. Only Firefox with the Remote Control extension, and Chrome with remote debugging, are supported right now.", default='firefox', choices=('firefox', 'chrome'))
     parser.add_argument('-k', '--ctrlmode', help="Control mode to use. If the browser control doesn't seem to work, try changing this.", default='hybrid', choices=('keyboard', 'fast', 'hybrid'))
@@ -103,6 +103,12 @@ def main(argv):
             agent = ntuple(verbose = True, filename = args.argdir)
         else:
             agent = ntuple(verbose = True, filename = args.argdir, depth = args.depth)
+    elif args.agent == 'vll':
+        from agent.vl_light import ntuple_light
+        if args.depth is None:
+            agent = ntuple_light(verbose = True, filename = args.argdir)
+        else:
+            agent = ntuple_light(verbose = True, filename = args.argdir, depth = args.depth)
     elif args.agent == 'dqn':
         # not implemented
         pass
