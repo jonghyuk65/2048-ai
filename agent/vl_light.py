@@ -7,7 +7,7 @@ import cPickle as pickle
 class ntuple_light(object):
     # value network learning with n(4)-tuple, light weight
 
-    def __init__(self, verbose = False, timecut = 0.1, filename = None, depth = 1):
+    def __init__(self, verbose = False, timecut = 0.1, filename = None, depth = 1, show_arg = False):
         self.verbose = verbose
         self.timecut = timecut
         self.env = Simple2048()
@@ -16,7 +16,7 @@ class ntuple_light(object):
         self.v1 = [np.array([0.,0.]) for i in range(39)] # row score, init by 0
         self.v2 = [np.array([0.,0.]) for i in range(14)] # box score, init by 0
         self.grad_count = 0
-        self.grad_upd_term = 1000
+        self.grad_upd_term = 100
         self.grad_v1 = [np.array([0.,0.]) for i in range(39)] # row grad, init by 0
         self.grad_v2 = [np.array([0.,0.]) for i in range(14)] # box grad, init by 0
         self.rank2idx_row, self.rank2idx_box = self.rank2idx_precalc()
@@ -25,6 +25,10 @@ class ntuple_light(object):
         self.depth = depth
         if filename is not None:
             self.load(filename)
+            if show_arg:
+                for v in self.v1: print v
+                for v in self.v2: print v
+
         # 0 1 2 3
         # 4 5 6 7
         # 8 9 10 11
@@ -105,7 +109,7 @@ class ntuple_light(object):
             pickle.dump(self.v1, f)
             pickle.dump(self.v2, f)
 
-    def load(self, filename):
+    def load(self, filename, verbose = False):
         with open(filename, 'r') as f:
             self.v1 = pickle.load(f)
             self.v2 = pickle.load(f)
@@ -148,15 +152,14 @@ class ntuple_light(object):
         if self.grad_count == self.grad_upd_term:
             grad_sum1 = np.array([0., 0.])
             for idx in range(39):
-                grad_sum1 = grad_sum1 + self.grad_v1[idx]
-                self.v1[idx] = self.v1[idx] + self.grad_v1[idx]
+                grad_sum1 = grad_sum1 + self.grad_v1[idx] / self.grad_upd_term
+                self.v1[idx] = self.v1[idx] + self.grad_v1[idx] / self.grad_upd_term
                 self.grad_v1[idx] = np.array([0., 0.])
             grad_sum2 = np.array([0., 0.])
             for idx in range(14):
-                grad_sum2 = grad_sum2 + self.grad_v2[idx]
-                self.v2[idx] = self.v2[idx] + self.grad_v2[idx]
+                grad_sum2 = grad_sum2 + self.grad_v2[idx] / self.grad_upd_term
+                self.v2[idx] = self.v2[idx] + self.grad_v2[idx] / self.grad_upd_term
                 self.grad_v2[idx] = np.array([0., 0.])
-            print "Updating gradient! grad sum ", grad_sum1, grad_sum2
             self.grad_count = 0
 
     def eval_move(self, board, m):
@@ -205,7 +208,7 @@ class ntuple_light(object):
         r_next, s_next_after = self.env.do_move_emulate(s_next, a_next)
         self.upd_eval(s_after, lr * (r_next + self.eval_board(s_next_after) - self.eval_board(s_after)))
 
-    def train_playout(self, lr = 0.001):
+    def train_playout(self, lr = 0.001, epsilon = 0):
         self.env.init_board()
         rsum = 0
         while True:
@@ -214,7 +217,13 @@ class ntuple_light(object):
             if len(moves) == 0: break
             s = self.env.getBoard_copy()
             if self.verbose: self.env.printState()
-            m = self.max_eval(s, verbose = self.verbose)
+            # epsilon greedy
+            e = np.random.random_sample()
+            if e < epsilon: # random
+                m = random.choice(moves)
+                if self.verbose: print "e-greedy: random pick in ", moves, " picked : ", self.movename(m)
+            else: # best
+                m = self.max_eval(s, verbose = self.verbose)
             r = self.env.do_move(m)
             rsum = rsum + r
 

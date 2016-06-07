@@ -2,6 +2,7 @@ from agent.SimpleAgent import RandomAgent
 from agent.SimpleAgent import MaxMerge
 from agent.MonteCarlo import SimpleMC
 from agent.vl import ntuple
+from agent.vl_light import ntuple_light
 from agent.environment.Simple2048 import Simple2048
 
 import time
@@ -48,5 +49,5 @@ if __name__ == '__main__':
     #testAgent(100, RandomAgent())
     #testAgent(100, MaxMerge())
     #testAgent(100, SimpleMC())
-    testAgent(100, ntuple(filename = 'models/vl_0518110412_200000'))
-    testAgent(100, ntuple(filename = 'models/vl_0518110412_200000', depth = 2))
+    #testAgent(100, ntuple(filename = 'models/vl_0518110412_200000'))
+    testAgent(100, ntuple_light(filename = 'models/vl_light_0606172534_50000', depth = 1, show_arg = True))
