@@ -217,13 +217,7 @@ class ntuple_light(object):
             if len(moves) == 0: break
             s = self.env.getBoard_copy()
             if self.verbose: self.env.printState()
-            # epsilon greedy
-            e = np.random.random_sample()
-            if e < epsilon: # random
-                m = random.choice(moves)
-                if self.verbose: print "e-greedy: random pick in ", moves, " picked : ", self.movename(m)
-            else: # best
-                m = self.max_eval(s, verbose = self.verbose)
+            m = self.max_eval(s, verbose = self.verbose)
             r = self.env.do_move(m)
             rsum = rsum + r
 
