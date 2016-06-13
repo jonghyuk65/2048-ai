@@ -7,7 +7,7 @@ import cPickle as pickle
 class ntuple_light(object):
     # value network learning with n(4)-tuple, light weight
 
-    def __init__(self, verbose = False, timecut = 0.1, filename = None, depth = 1, show_arg = False):
+    def __init__(self, verbose = False, timecut = 0.1, filename = None, depth = 1, show_arg = False, xtype = 'max'):
         self.verbose = verbose
         self.timecut = timecut
         self.env = Simple2048()
@@ -21,6 +21,11 @@ class ntuple_light(object):
         self.grad_v2 = [np.array([0.,0.]) for i in range(14)] # box grad, init by 0
         self.rank2idx_row, self.rank2idx_box = self.rank2idx_precalc()
         self.norm_x = 0.1
+
+        if xtype == 'max':
+            self.extract_x = self.max_x
+        elif xtype == 'mean':
+            self.extract_x = self.mean_x
 
         self.depth = depth
         if filename is not None:
@@ -114,14 +119,21 @@ class ntuple_light(object):
             self.v1 = pickle.load(f)
             self.v2 = pickle.load(f)
 
+    def max_x(self, row):
+        return np.array([max(row) / 10., 1.])
+
+    def mean_x(self, row):
+        row_mean = np.mean([2**r for r in row]) # 0 as 1 for simplicity
+        return np.array([np.log2(row_mean) / 10., 1.])
+
     def row2idx(self, row):
         rank = self.row2rank(row)
-        x = np.array([max(row) / 10., 1.])
+        x = self.extract_x(row)
         return (self.rank2idx_row[rank[0]*4*4*4 + rank[1]*4*4 + rank[2]*4 + rank[3]], x)
 
     def box2idx(self, row):
         rank = self.row2rank(row)
-        x = np.array([max(row) / 10., 1.])
+        x = self.extract_x(row)
         return (self.rank2idx_box[rank[0]*4*4*4 + rank[1]*4*4 + rank[2]*4 + rank[3]], x)
 
     def board2idxs(self, board):
