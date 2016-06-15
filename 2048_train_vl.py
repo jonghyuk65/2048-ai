@@ -8,14 +8,15 @@ train_time = time.strftime("%m%d%H%M%S")
 def train(agent):
     # playouts by policy in agent
     start = time.time()
-    alpha = 0.01
-    save_period = 30000
-    num_epoch = 300000
+    save_period = 10000
+    num_epoch = 100000
+    alpha_scenario = [1]*2000 + [0.1]*3000 + [0.01]*(num_epoch-5000)
     for epoch in range(num_epoch):
+        alpha = alpha_scenario[epoch]
         score, maxval = agent.train_playout(lr = alpha)
         print("%010.6f Epoch %d: Alpha %.4f, Score %d, Max %d" % (time.time() - start, epoch, alpha, score, maxval))
         if epoch % save_period == 0 and epoch > 0:
-            agent.save(filename = 'models/vl_light_mean_{}_{}'.format(train_time, epoch))
+            agent.save(filename = 'models/vl_light_meandiffquad_{}_{}'.format(train_time, epoch))
 
 def parse_args(argv):
     import argparse

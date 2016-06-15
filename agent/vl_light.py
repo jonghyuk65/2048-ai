@@ -61,12 +61,11 @@ class ntuple_light(object):
                 self.tuples2.append([4*i+j, 4*i+j+1, 4*(i+1)+j, 4*(i+1)+j+1])
 
     def row2rank(self, v):
-        n = len(v)
-        r = [0 for i in range(len(v))]
-        for i in range(n):
-            for j in range(n):
-                if v[j] < v[i]:
-                    r[i] = r[i] + 1
+        r = []
+        r.append((1 if v[0]>v[1] else 0) + (1 if v[0]>v[2] else 0) + (1 if v[0]>v[3] else 0))
+        r.append((1 if v[1]>v[0] else 0) + (1 if v[1]>v[2] else 0) + (1 if v[1]>v[3] else 0))
+        r.append((1 if v[2]>v[0] else 0) + (1 if v[2]>v[1] else 0) + (1 if v[2]>v[3] else 0))
+        r.append((1 if v[3]>v[0] else 0) + (1 if v[3]>v[1] else 0) + (1 if v[3]>v[2] else 0))
         return r
 
     def grouping_idens(self, rs, idens):
@@ -134,14 +133,14 @@ class ntuple_light(object):
 
     def meanquad_x(self, row):
         row_mean = np.mean([2**r for r in row]) # 0 as 1 for simplicity
-        x = np.log2(row_mean)
-        return np.array([x * x / 100., x / 10., 1.])
+        x = np.log2(row_mean) / 10.
+        return np.array([x * x, x, 1.])
 
     def meandiffquad_x(self, row):
         row_mean = np.mean([2**r for r in row]) # 0 as 1 for simplicity
-        x = np.log2(row_mean)
-        d = max(row)-min(row)
-        return np.array([x * x / 100., x / 10., d / 10., 1.])
+        x = np.log2(row_mean) / 10.
+        d = (max(row)-min(row)) / 10.
+        return np.array([x * x, x, d, 1.])
 
     def row2idx(self, row):
         rank = self.row2rank(row)
