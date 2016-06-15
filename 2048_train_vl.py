@@ -27,7 +27,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    agent = ntuple_light(verbose = False, xtype = 'meanquad')
+    agent = ntuple_light(verbose = False, xtype = 'meandiffquad')
     if args.model is not None:
         agent.load(args.model)
     train(agent)

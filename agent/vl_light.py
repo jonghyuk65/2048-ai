@@ -21,6 +21,9 @@ class ntuple_light(object):
         elif xtype == 'meanquad':
             self.extract_x = self.meanquad_x
             self.dim = 2;
+        elif xtype == 'meandiffquad':
+            self.extract_x = self.meandiffquad_x
+            self.dim = 3;
 
         self.v1 = [np.zeros(self.dim+1) for i in range(39)] # row score, init by 0
         self.v2 = [np.zeros(self.dim+1) for i in range(14)] # box score, init by 0
@@ -134,6 +137,12 @@ class ntuple_light(object):
         x = np.log2(row_mean)
         return np.array([x * x / 100., x / 10., 1.])
 
+    def meandiffquad_x(self, row):
+        row_mean = np.mean([2**r for r in row]) # 0 as 1 for simplicity
+        x = np.log2(row_mean)
+        d = max(row)-min(row)
+        return np.array([x * x / 100., x / 10., d / 10., 1.])
+
     def row2idx(self, row):
         rank = self.row2rank(row)
         x = self.extract_x(row)
@@ -172,13 +181,13 @@ class ntuple_light(object):
         if self.grad_count == self.grad_upd_term:
             grad_sum1 = np.zeros(self.dim+1)
             for idx in range(39):
-                grad_sum1 = grad_sum1 + self.grad_v1[idx] / self.grad_upd_term
-                self.v1[idx] = self.v1[idx] + self.grad_v1[idx] / self.grad_upd_term
+                grad_sum1 = grad_sum1 + self.grad_v1[idx]
+                self.v1[idx] = self.v1[idx] + self.grad_v1[idx]
                 self.grad_v1[idx] = np.zeros(self.dim+1)
             grad_sum2 = np.zeros(self.dim+1)
             for idx in range(14):
-                grad_sum2 = grad_sum2 + self.grad_v2[idx] / self.grad_upd_term
-                self.v2[idx] = self.v2[idx] + self.grad_v2[idx] / self.grad_upd_term
+                grad_sum2 = grad_sum2 + self.grad_v2[idx]
+                self.v2[idx] = self.v2[idx] + self.grad_v2[idx]
                 self.grad_v2[idx] = np.zeros(self.dim+1)
             self.grad_count = 0
 
