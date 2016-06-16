@@ -27,10 +27,10 @@ class ntuple_light(object):
 
         self.v1 = [np.zeros(self.dim+1) for i in range(39)] # row score, init by 0
         self.v2 = [np.zeros(self.dim+1) for i in range(14)] # box score, init by 0
-        self.grad_v1 = [np.zeros(self.dim+1) for i in range(39)] # row grad, init by 0
-        self.grad_v2 = [np.zeros(self.dim+1) for i in range(14)] # box grad, init by 0
-        self.grad_count = 0
-        self.grad_upd_term = 100
+        #self.grad_v1 = [np.zeros(self.dim+1) for i in range(39)] # row grad, init by 0
+        #self.grad_v2 = [np.zeros(self.dim+1) for i in range(14)] # box grad, init by 0
+        #self.grad_count = 0
+        #self.grad_upd_term = 10
         self.rank2idx_row, self.rank2idx_box = self.rank2idx_precalc()
 
         self.depth = depth
@@ -173,22 +173,29 @@ class ntuple_light(object):
     def upd_eval(self, board, delta_v):
         idx1, idx2 = self.board2idxs(board)
         for (idx, x) in idx1:
-            self.grad_v1[idx] = self.grad_v1[idx] + delta_v * x
+            self.v1[idx] = self.v1[idx] + delta_v * x
         for (idx, x) in idx2:
-            self.grad_v2[idx] = self.grad_v2[idx] + delta_v * x
-        self.grad_count = self.grad_count + 1
-        if self.grad_count == self.grad_upd_term:
-            grad_sum1 = np.zeros(self.dim+1)
-            for idx in range(39):
-                grad_sum1 = grad_sum1 + self.grad_v1[idx]
-                self.v1[idx] = self.v1[idx] + self.grad_v1[idx]
-                self.grad_v1[idx] = np.zeros(self.dim+1)
-            grad_sum2 = np.zeros(self.dim+1)
-            for idx in range(14):
-                grad_sum2 = grad_sum2 + self.grad_v2[idx]
-                self.v2[idx] = self.v2[idx] + self.grad_v2[idx]
-                self.grad_v2[idx] = np.zeros(self.dim+1)
-            self.grad_count = 0
+            self.v2[idx] = self.v2[idx] + delta_v * x
+
+#    def upd_eval(self, board, delta_v):
+#        idx1, idx2 = self.board2idxs(board)
+#        for (idx, x) in idx1:
+#            self.grad_v1[idx] = self.grad_v1[idx] + delta_v * x
+#        for (idx, x) in idx2:
+#            self.grad_v2[idx] = self.grad_v2[idx] + delta_v * x
+#        self.grad_count = self.grad_count + 1
+#        if self.grad_count == self.grad_upd_term:
+#            grad_sum1 = np.zeros(self.dim+1)
+#            for idx in range(39):
+#                grad_sum1 = grad_sum1 + self.grad_v1[idx]
+#                self.v1[idx] = self.v1[idx] + self.grad_v1[idx]
+#                self.grad_v1[idx] = np.zeros(self.dim+1)
+#            grad_sum2 = np.zeros(self.dim+1)
+#            for idx in range(14):
+#                grad_sum2 = grad_sum2 + self.grad_v2[idx]
+#                self.v2[idx] = self.v2[idx] + self.grad_v2[idx]
+#                self.grad_v2[idx] = np.zeros(self.dim+1)
+#            self.grad_count = 0
 
     def eval_move(self, board, m):
         r, s_after = self.env.do_move_emulate(board, m)

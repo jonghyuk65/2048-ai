@@ -10,7 +10,7 @@ def train(agent):
     start = time.time()
     save_period = 10000
     num_epoch = 100000
-    alpha_scenario = [1]*2000 + [0.1]*3000 + [0.01]*(num_epoch-5000)
+    alpha_scenario = [0.005]*5000 + [0.0025]*5000 + [0.001]*(num_epoch-10000)
     for epoch in range(num_epoch):
         alpha = alpha_scenario[epoch]
         score, maxval = agent.train_playout(lr = alpha)
