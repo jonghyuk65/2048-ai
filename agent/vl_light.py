@@ -94,12 +94,8 @@ class ntuple_light(object):
         v = [0, 0, 0, 0]
         while True:
             r = self.row2rank(v)
-            flag = True
-            for old_r in rs:
-                if old_r == r:
-                    flag = False
-                    break
-            if flag: rs.append(r)
+            if r == v:
+                rs.append(r)
             i = 3
             while i >= 0:
                 v[i] = v[i] + 1
@@ -120,9 +116,21 @@ class ntuple_light(object):
             pickle.dump(self.v2, f)
 
     def load(self, filename, verbose = False):
-        with open(filename, 'r') as f:
-            self.v1 = pickle.load(f)
-            self.v2 = pickle.load(f)
+        if len(filename) > 4 and filename[-4:] == '.pkl':
+            with open(filename, 'r') as f:
+                self.v1 = pickle.load(f)
+                self.v2 = pickle.load(f)
+        else: # meandiffquad only
+            with open(filename, 'r') as f:
+                for i in range(39):
+                    for j in range(4):
+                        self.v1[i][j] = np.fromfile(f, dtype=np.double, count=1)
+                for i in range(14):
+                    for j in range(4):
+                        self.v2[i][j] = np.fromfile(f, dtype=np.double, count=1)
+            if verbose:
+                print self.v1
+                print self.v2
 
     def max_x(self, row):
         return np.array([max(row) / 10., 1.])
@@ -239,13 +247,16 @@ class ntuple_light(object):
             print s_next
         if a_next == None: # terminal
             self.upd_eval(s_after, lr * (0 - self.eval_board(s_after)))
-            return
+            return (0 - self.eval_board(s_after))
         r_next, s_next_after = self.env.do_move_emulate(s_next, a_next)
         self.upd_eval(s_after, lr * (r_next + self.eval_board(s_next_after) - self.eval_board(s_after)))
+        return (r_next + self.eval_board(s_next_after) - self.eval_board(s_after))
 
     def train_playout(self, lr = 0.001, epsilon = 0):
         self.env.init_board()
         rsum = 0
+        loss = 0.
+        loss_cnt = 0.
         while True:
             # do move
             moves = self.env.legal_moves()
@@ -258,8 +269,9 @@ class ntuple_light(object):
 
             # update
             s_next = self.env.getBoard_copy()
-            self.learn_move(s, m, s_next, lr)
-        return rsum, self.env.maxVal()
+            loss = loss + self.learn_move(s, m, s_next, lr)
+            loss_cnt = loss_cnt + 1.
+        return rsum, self.env.maxVal(), loss / loss_cnt
 
     def max_eval_ts(self, board, depth, verbose, isRoot):
         if depth == 1:

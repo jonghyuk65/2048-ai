@@ -13,8 +13,8 @@ def train(agent):
     alpha_scenario = [0.005]*5000 + [0.0025]*5000 + [0.001]*(num_epoch-10000)
     for epoch in range(num_epoch):
         alpha = alpha_scenario[epoch]
-        score, maxval = agent.train_playout(lr = alpha)
-        print("%010.6f Epoch %d: Alpha %.4f, Score %d, Max %d" % (time.time() - start, epoch, alpha, score, maxval))
+        score, maxval, loss = agent.train_playout(lr = alpha)
+        print("%010.6f Epoch %d: Alpha %.4f, Score %d, Max %d, Loss %.4f" % (time.time() - start, epoch, alpha, score, maxval, loss))
         if epoch % save_period == 0 and epoch > 0:
             agent.save(filename = 'models/vl_light_meandiffquad_{}_{}'.format(train_time, epoch))
 
