@@ -5,14 +5,11 @@
 
 void vl_lr_scenario(int epoch, double *lr){
     lr[0] = 0; lr[1] = 0; lr[2] = 0; lr[3] = 0;
-    if(epoch <= 5000000){
-        lr[3] = 0.001;
-    }
-    else if(epoch <= 10000000){
+    if(epoch <= 500000){
         lr[1] = 0.001;
         lr[3] = 0.001;
     }
-    else if(epoch <= 20000000){
+    else if(epoch <= 1000000){
         lr[0] = 0.001;
         lr[1] = 0.001;
         lr[3] = 0.001;
@@ -34,6 +31,7 @@ void train_vl(){
     double lr[4];
     int cnt, i, moves[4], a, r, r_sum, max_v, dropout;
     board_t s, s_next;
+    char filename[20];
     //agent.verbose = 1;
     int cont = 0;
     if(cont){
@@ -49,7 +47,7 @@ void train_vl(){
     generator.seed(std::random_device{}());
     std::uniform_int_distribution<int> dropdis(0,10);
 
-    for(epoch = 1; epoch <= 30000000; epoch++){
+    for(epoch = 1; epoch <= 1500000; epoch++){
         vl_lr_scenario(epoch, lr);
         env.init_board();
         r_sum = 0;
@@ -74,11 +72,12 @@ void train_vl(){
 
         printf("%10.2f Epoch %7d: %7d, %5d, %lf\n", float( clock () - begin_time ) /  CLOCKS_PER_SEC, epoch, r_sum, max_v, loss_sum / loss_cnt);
 
-        if(epoch % 100000 == 0){
+        if(epoch % 250000 == 0){
             for(i=0;i<39;i++) printf("%9.2lf %9.2lf %9.2lf %9.2lf\n", agent.v_str[i].alpha, agent.v_str[i].beta, agent.v_str[i].gamma, agent.v_str[i].delta);
             for(i=0;i<14;i++) printf("%9.2lf %9.2lf %9.2lf %9.2lf\n", agent.v_box[i].alpha, agent.v_box[i].beta, agent.v_box[i].gamma, agent.v_box[i].delta);
             // save
-            FILE *fp = fopen("model", "wb");
+            sprintf(filename, "model_%d",epoch);
+            FILE *fp = fopen(filename, "wb");
             int i;
             fwrite(&agent.v_str[i], sizeof(double) * 4, 39, fp);
             fwrite(&agent.v_box[i], sizeof(double) * 4, 14, fp);

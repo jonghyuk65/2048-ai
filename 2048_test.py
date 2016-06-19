@@ -54,4 +54,29 @@ if __name__ == '__main__':
     #testAgent(100, ntuple_light(filename = 'models/vl_light_mean_0613205412_30000', xtype='meanquad'))
     #testAgent(100, ntuple(filename = 'models/vl_0518110412_50000', depth = 2))
     #testAgent(100, ntuple_light(filename = 'models/vl_light_mean_0613205412_30000', xtype='meanquad', depth = 2, show_arg = False))
-    testAgent(100, ntuple_light(filename = 'C_impl/model', xtype='meandiffquad'))
+    print "model_500000"
+    #testAgent(100, ntuple_light(filename = 'C_impl/model_500000', xtype='meandiffquad'))
+    testAgent(20, ntuple_light(filename = 'C_impl/model_500000', xtype='meandiffquad', depth = 2))
+
+
+'''
+model_250000
+Test  ntuple_light
+Results: 24164.48 4096.0
+256 : 1.0
+512 : 1.0
+1024 : 0.97
+2048 : 0.54
+4096 : 0.05
+8192 : 0.0
+
+model_500000
+Test  ntuple_light
+Results: 24168.28 4096.0
+256 : 1.0
+512 : 0.99
+1024 : 0.9
+2048 : 0.51
+4096 : 0.07
+8192 : 0.0
+'''
